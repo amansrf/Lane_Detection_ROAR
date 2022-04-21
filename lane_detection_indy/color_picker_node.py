@@ -15,6 +15,7 @@ import numpy as np
 from sensor_msgs.msg import Image
 
 
+
 class RoadMaskNode(Node):
     def __init__(self):
         super().__init__("road_mask_node")
