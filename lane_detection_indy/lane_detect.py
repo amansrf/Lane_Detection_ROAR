@@ -7,6 +7,8 @@ from cv_bridge import CvBridge
 import numpy as np
 from sensor_msgs.msg import Image
 
+import time
+
 GROUND_MASK_LOWER = np.array([0,0,80],dtype='uint8')
 GROUND_MASK_UPPER = np.array([255,50,200],dtype='uint8')
 # GROUND_MASK_LOWER = np.array([0,0,40],dtype='uint8')
@@ -52,22 +54,23 @@ class LaneDetect(Node):
         self.debug = self.get_parameter("debug").get_parameter_value().bool_value
 
         qos_profile = QoSProfile(
-            reliability=QoSReliabilityPolicy.RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT,
-            durability=QoSDurabilityPolicy.RMW_QOS_POLICY_DURABILITY_VOLATILE,
-            liveliness=QoSLivelinessPolicy.RMW_QOS_POLICY_LIVELINESS_AUTOMATIC,
-            depth=10,
+            reliability=QoSReliabilityPolicy.SYSTEM_DEFAULT,
+            durability=QoSDurabilityPolicy.SYSTEM_DEFAULT,
+            liveliness=QoSLivelinessPolicy.SYSTEM_DEFAULT,
+            depth=1,
         )
         self.img_sub = self.create_subscription(
-            Image,
-            '/rgb_image',
-            self.img_callback,
-            qos_profile)
+            Image, self.rgb_camera_topic, self.img_callback, qos_profile=qos_profile
+        )
 
-        self.mask_pub = self.create_publisher(Image, "/mask_image", qos_profile=qos_profile)
+        self.mask_pub = self.create_publisher(
+            Image, f"{self.rgb_camera_topic}/road_mask", qos_profile=qos_profile
+        )
         self.img_sub  # prevent unused variable warning
 
     def img_callback(self, msg):
 
+        tic = time.time()
         # Converting ROS image message to RGB
         image = self.bridge.imgmsg_to_cv2(msg,desired_encoding='bgr8')
 
@@ -90,7 +93,9 @@ class LaneDetect(Node):
         closing_kernel = np.ones((15, 15))
         final_mask = cv2.morphologyEx(final_mask, cv2.MORPH_CLOSE, kernel=closing_kernel)
         final_mask = cv2.morphologyEx(final_mask, cv2.MORPH_OPEN, kernel=opening_kernel)
-    
+        toc = time.time()
+
+        self.get_logger().info(f"Processing Time: {toc-tic}")
         self.mask_pub.publish(self.bridge.cv2_to_imgmsg(final_mask, encoding="mono8"))
 
     def get_seed_value(self, img):

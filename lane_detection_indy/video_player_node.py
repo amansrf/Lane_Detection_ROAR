@@ -35,6 +35,9 @@ class TestVideoPlayerNode(rclpy.node.Node):
             if self.debug:
                 cv2.imshow("frame", frame)
                 cv2.waitKey(1)
+            #### SANDBOX ####
+            frame = cv2.resize(frame, (frame.shape[1]//2, frame.shape[0]//2))
+            #################
             rgb_img_msg = self.bridge.cv2_to_imgmsg(frame, encoding="bgr8")
             rgb_img_msg.header.frame_id = "base_link"
             self.img_pub.publish(rgb_img_msg)

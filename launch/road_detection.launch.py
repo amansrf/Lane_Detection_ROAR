@@ -30,8 +30,8 @@ def generate_launch_description():
             ),
             launch_ros.actions.Node(
                 package="lane_detection_indy",
-                executable="lane_detect",
-                name="lane_detect",
+                executable="road_mask_node",
+                name="road_mask_node",
                 parameters=[
                     {
                         "rgb_camera_topic": launch.substitutions.LaunchConfiguration(
