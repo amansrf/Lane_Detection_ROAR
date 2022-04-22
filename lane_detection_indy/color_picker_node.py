@@ -1,4 +1,4 @@
-import black
+#import black
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import (
@@ -36,6 +36,8 @@ class RoadMaskNode(Node):
             Image, self.rgb_camera_topic, self.img_callback, qos_profile=qos_profile
         )
 
+        self.img_pub = self.create_publisher(Image, "/stack_img", qos_profile=qos_profile)
+
     def img_callback(self, msg: Image):
 
         # Converting ROS image message to RGB
@@ -45,6 +47,8 @@ class RoadMaskNode(Node):
         img2 = cv2.cvtColor(img1, cv2.COLOR_RGB2HSV)
         # concatenate image Horizontally
         Hori = np.concatenate((img1, img2), axis=1)
+
+        self.img_pub.publish(Hori)
 
         cv2.imshow("HORIZONTAL", Hori)
         cv2.waitKey(1)

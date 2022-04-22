@@ -13,7 +13,7 @@ import numpy as np
 
 bridge = CvBridge()
 
-path = "/home/roar/LaneDetection/P6010001.MOV"
+path = "/home/roar/Desktop/LaneDetection/P6010001.MOV"
 
 class RGBStreamer(Node):
     def __init__(self):
@@ -40,6 +40,7 @@ class RGBStreamer(Node):
             print("Game Over")
             rclpy.shutdown()
 
+        #img = cv2.resize(img, (400, 400)).astype(np.uint8)
         rgb_img_msg = bridge.cv2_to_imgmsg(img, encoding="bgr8")
         rgb_img_msg.header.stamp = self.get_clock().now().to_msg()
         self.rgb_image_pub.publish(rgb_img_msg)
